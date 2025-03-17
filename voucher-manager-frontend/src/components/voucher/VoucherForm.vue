@@ -31,46 +31,33 @@ const createVoucher = async () => {
 
 <template>
   <form @submit.prevent="createVoucher" class="voucher-form">
-    <input 
-      v-model="code"
-      type="text"
-      placeholder="Gutschein-Code eingeben"
-      class="code-input"
-      required
-    />
-    <button type="submit" class="submit-button">
-      Hinzufügen
-    </button>
+    <v-row>
+      <v-col cols="12" sm="8">
+        <v-text-field
+          v-model="code"
+          label="Gutschein-Code"
+          placeholder="Gutschein-Code eingeben"
+          required
+          hide-details
+          variant="outlined"
+          density="comfortable"
+        />
+      </v-col>
+      <v-col cols="12" sm="4" class="d-flex align-center">
+        <v-btn
+          type="submit"
+          color="success"
+          block
+        >
+          Hinzufügen
+        </v-btn>
+      </v-col>
+    </v-row>
   </form>
 </template>
 
 <style scoped>
 .voucher-form {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
   width: 100%;
-}
-
-.code-input {
-  flex: 1;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-.submit-button {
-  padding: 0.75rem 1.5rem;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.submit-button:hover {
-  background-color: #45a049;
 }
 </style>

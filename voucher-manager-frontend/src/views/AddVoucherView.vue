@@ -8,39 +8,26 @@ const router = useRouter();
 const handleVoucherAdded = () => {
   router.push(`/shops/${route.params.shopId}`);
 };
-
-const goBack = () => {
-  router.back();
-};
 </script>
 
 <template>
-  <div class="add-voucher-view">
-    <button class="back-button" @click="goBack">Back to shop</button>
-    <h2>Add New Voucher</h2>
-    <VoucherForm 
-      :shopId="route.params.shopId" 
-      @voucher-added="handleVoucherAdded"
-    />
-  </div>
+  <v-container fluid class="pa-4">
+    <v-row justify="center">
+      <v-col cols="12" sm="8" md="6">
+        <v-card class="pa-4">
+          <v-card-title class="text-h5 mb-4">
+            Add New Voucher
+          </v-card-title>
+          <VoucherForm 
+            :shopId="route.params.shopId" 
+            @voucher-added="handleVoucherAdded"
+          />
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <style scoped>
-.add-voucher-view {
-  padding: 1rem;
-}
-
-.back-button {
-  margin-bottom: 1rem;
-  padding: 0.5rem 1rem;
-  background-color: #f1f1f1;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-h2 {
-  margin-bottom: 1.5rem;
-  color: #333;
-}
+/* Remove previous styles as they're no longer needed */
 </style>

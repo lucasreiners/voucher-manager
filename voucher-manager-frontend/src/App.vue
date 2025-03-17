@@ -1,13 +1,25 @@
 <script setup>
+import { computed } from 'vue';
 import { onMounted } from 'vue';
 import { useVoucherStore } from './state/voucherStore';
 import { useShopStore } from './state/shopStore';
 import { fetchShops, fetchVouchers } from './services/apiService';
-import HomeView from './views/HomeView.vue';
-import AppHeader from './components/layout/AppHeader.vue'
+import { useRouter, useRoute } from 'vue-router';
 
+const router = useRouter();
+const route = useRoute();
 const voucherStore = useVoucherStore();
 const shopStore = useShopStore();
+
+const isShopDetail = computed(() => {
+  return route.name === 'shop-detail';
+});
+
+const goToAddVoucher = () => {
+  if (isShopDetail.value) {
+    router.push(`/shops/${route.params.id}/add-voucher`);
+  }
+};
 
 onMounted(async () => {
   try {
@@ -23,26 +35,36 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div id="app">
-    <AppHeader />
-    <main>
+  <v-app>
+    <v-app-bar color="primary" elevation="2">
+      <template v-slot:prepend>
+        <v-app-bar-nav-icon 
+          v-if="router.currentRoute.value.path.includes('/shops/')" 
+          @click="router.back()"
+        >
+          <v-icon>mdi-arrow-left</v-icon>
+        </v-app-bar-nav-icon>
+      </template>
+      
+      <v-app-bar-title>Voucher Manager</v-app-bar-title>
+
+      <template v-slot:append>
+        <v-btn
+          v-if="isShopDetail"
+          icon
+          @click="goToAddVoucher"
+        >
+          <v-icon>mdi-plus</v-icon>
+        </v-btn>
+      </template>
+    </v-app-bar>
+
+    <v-main>
       <router-view></router-view>
-    </main>
-  </div>
+    </v-main>
+  </v-app>
 </template>
 
 <style>
 @import './assets/main.css';
-
-main {
-  width: 100%;
-  min-height: 100vh;
-}
-
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
-}
 </style>

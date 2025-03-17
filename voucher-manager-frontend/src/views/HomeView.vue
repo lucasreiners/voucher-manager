@@ -1,51 +1,35 @@
 <script setup>
-import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useShopStore } from '../state/shopStore';
 import AppHeader from '../components/layout/AppHeader.vue';
 import ShopList from '../components/shop/ShopList.vue';
-import ShopDetailView from './ShopDetailView.vue';
 
+const router = useRouter();
 const shopStore = useShopStore();
-const selectedShop = ref(null);
 
 const showShopDetails = (shop) => {
-  selectedShop.value = shop;
-};
-
-const closeShopDetails = () => {
-  selectedShop.value = null;
+  router.push(`/shops/${shop.id}`);
 };
 </script>
 
 <template>
-  <div class="home-container">
+  <v-container fluid class="home-container pa-4">
     <AppHeader title="Shops" />
-    
-    <template v-if="!selectedShop">
-      <ShopList 
-        :shops="shopStore.shops" 
-        @shopSelected="showShopDetails"
-      />
-    </template>
-    
-    <ShopDetailView
-      v-else
-      :shop="selectedShop"
-      @close="closeShopDetails"
+    <ShopList 
+      :shops="shopStore.shops" 
+      @shopSelected="showShopDetails"
     />
-  </div>
+  </v-container>
 </template>
 
 <style scoped>
 .home-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
+  width: 100%;
 }
 
 @media (max-width: 768px) {
   .home-container {
-    padding: 1rem;
+    padding: 8px !important;
   }
 }
 </style>

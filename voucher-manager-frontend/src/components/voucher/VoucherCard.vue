@@ -56,7 +56,7 @@ const handleRedeem = () => {
       class="redeem-button" 
       @click="handleRedeem"
     >
-      Gutschein als verbraucht markieren
+      Guthaben verbraucht
     </button>
     
     <p v-else class="redemption-date">

@@ -1,40 +1,35 @@
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
+import { useRoute } from 'vue-router';
 import { useVoucherStore } from "../state/voucherStore";
-import { useRouter } from 'vue-router';
+import { useShopStore } from "../state/shopStore";
 import VoucherCard from '../components/voucher/VoucherCard.vue';
 import ConfirmDialog from '../components/layout/ConfirmDialog.vue';
 
-const props = defineProps({
-	shop: {
-		type: Object,
-		required: true,
-	},
-});
-
-const emit = defineEmits(["close"]);
-const router = useRouter();
+const route = useRoute();
 const voucherStore = useVoucherStore();
+const shopStore = useShopStore();
+
 const isRedeeming = ref(false);
 const redeemError = ref(null);
 const showConfirmDialog = ref(false);
 
-const firstUnredeemedVoucher = computed(() => {
-  return voucherStore.vouchers
-    .filter((v) => v.shopId === props.shop.id && !v.redeemedAt)
-    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0] 
-    || voucherStore.vouchers.find((v) => v.shopId === props.shop.id);
+const shop = computed(() => {
+  return shopStore.shops.find(s => s.id === route.params.id);
 });
 
-const closeShopDetails = () => {
-  emit('close');
-};
+const firstUnredeemedVoucher = computed(() => {
+  if (!shop.value) return null;
+  return voucherStore.vouchers
+    .filter((v) => v.shopId === shop.value.id && !v.redeemedAt)
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0] 
+    || voucherStore.vouchers.find((v) => v.shopId === shop.value.id);
+});
 
 const redeemVoucher = async () => {
   if (!firstUnredeemedVoucher.value || firstUnredeemedVoucher.value.redeemedAt) {
     return;
   }
-
   try {
     isRedeeming.value = true;
     redeemError.value = null;
@@ -59,64 +54,57 @@ const closeConfirmDialog = () => {
 const handleRedeem = () => {
   openConfirmDialog();
 };
-
-const goToAddVoucher = () => {
-  router.push(`/shops/${props.shop.id}/add-voucher`);
-};
 </script>
 
 <template>
-  <div class="shop-detail">
-    <button class="back-button" @click="closeShopDetails">Back to shops</button>
-    <div
+  <v-container fluid class="pa-4">
+    <div v-if="!shop" class="shop-detail-error">
+      <v-alert type="warning" class="mx-4">
+        Shop nicht gefunden
+      </v-alert>
+    </div>
+    
+    <div v-else class="shop-detail">
+      <div
         class="shop-header"
         :style="{ backgroundColor: shop.backgroundColor }"
-    >
-      <img :src="shop.iconUrl" alt="Shop icon" class="shop-detail-icon" crossorigin="anonymous"/>
-      <h2>{{ shop.name }}</h2>
-    </div>
+      >
+        <img :src="shop.iconUrl" alt="Shop icon" class="shop-detail-icon" crossorigin="anonymous"/>
+        <h2>{{ shop.name }}</h2>
+      </div>
 
-    <!-- Add Voucher Button -->
-    <div class="action-container">
-      <button class="add-voucher-button" @click="goToAddVoucher">
-        Add New Voucher
-      </button>
-    </div>
+      <!-- Voucher Card -->
+      <div class="featured-voucher-container" v-if="firstUnredeemedVoucher">
+        <VoucherCard 
+          :voucher="firstUnredeemedVoucher" 
+          @redeem="handleRedeem"
+        />
+        
+        <v-alert
+          v-if="redeemError"
+          type="error"
+          class="mt-4"
+        >
+          {{ redeemError }}
+        </v-alert>
+      </div>
 
-    <!-- Voucher Card -->
-    <div class="featured-voucher-container" v-if="firstUnredeemedVoucher">
-      <VoucherCard 
-        :voucher="firstUnredeemedVoucher" 
-        @redeem="handleRedeem"
+      <!-- Confirmation Dialog -->
+      <ConfirmDialog
+        v-if="showConfirmDialog"
+        title="Als verbraucht markieren"
+        message="Sind Sie sicher, dass Sie diesen Gutschein als verbraucht markieren wollen?"
+        :isLoading="isRedeeming"
+        @confirm="redeemVoucher"
+        @cancel="closeConfirmDialog"
       />
-      
-      <div v-if="redeemError" class="error-message">{{ redeemError }}</div>
     </div>
-
-    <!-- Confirmation Dialog -->
-    <ConfirmDialog
-      v-if="showConfirmDialog"
-      title="Als verbraucht markieren"
-      message="Sind Sie sicher, dass Sie diesen Gutschein als verbraucht markieren wollen?"
-      :isLoading="isRedeeming"
-      @confirm="redeemVoucher"
-      @cancel="closeConfirmDialog"
-    />
-  </div>
+  </v-container>
 </template>
 
 <style scoped>
-.shop-detail {
-  margin-top: 2rem;
-}
-
-.back-button {
-  margin-bottom: 1rem;
-  padding: 0.5rem 1rem;
-  background-color: #f1f1f1;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.shop-detail, .shop-detail-error {
+  width: 100%;
 }
 
 .shop-header {
@@ -140,36 +128,10 @@ const goToAddVoucher = () => {
   flex-direction: column;
   align-items: center;
   margin: 2rem 0;
-}
-
-.error-message {
-  color: #d32f2f;
-  margin-top: 1rem;
-  font-size: 0.9rem;
-  padding: 0.5rem 1rem;
-  background-color: #ffebee;
-  border-radius: 4px;
-}
-
-.action-container {
-  padding: 1rem;
-  margin-bottom: 2rem;
-  text-align: center;
-}
-
-.add-voucher-button {
-  padding: 0.75rem 1.5rem;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.add-voucher-button:hover {
-  background-color: #45a049;
+  width: 100%;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 @media (max-width: 768px) {
@@ -177,8 +139,7 @@ const goToAddVoucher = () => {
     flex-direction: column;
     text-align: center;
     padding: 1.5rem 1rem;
-    margin: 0 0.5rem 2rem 0.5rem;
-    width: calc(100% - 1rem);
+    margin: 0 0 2rem 0;
   }
 
   .shop-detail-icon {
@@ -186,12 +147,6 @@ const goToAddVoucher = () => {
     margin-bottom: 1rem;
     width: 80px;
     height: 80px;
-  }
-
-  .back-button {
-    width: calc(100% - 1rem);
-    padding: 0.75rem;
-    margin: 0 0.5rem 1rem 0.5rem;
   }
 }
 
