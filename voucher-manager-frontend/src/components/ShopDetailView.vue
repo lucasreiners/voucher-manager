@@ -19,10 +19,7 @@ const redeemError = ref(null);
 const showConfirmDialog = ref(false);
 
 const firstShopVoucher = computed(() => {
-	return voucherStore.vouchers
-		.filter((v) => v.shopId === props.shop.id && !v.redeemedAt)
-		.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0] 
-		|| voucherStore.vouchers.find((v) => v.shopId === props.shop.id);
+	return voucherStore.vouchers.find((v) => v.shopId === props.shop.id);
 });
 
 // Use onMounted to ensure the DOM is ready

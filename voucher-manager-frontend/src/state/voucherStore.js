@@ -1,39 +1,34 @@
-import {defineStore} from 'pinia';
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
+import { redeemVoucher as apiRedeemVoucher } from '../services/apiService';
 
-export const useVoucherStore = defineStore('voucherStore', {
-    state: () => ({
-        vouchers: [],
-    }),
-    actions: {
-        setVouchers(vouchers) {
-            this.vouchers = vouchers;
-        },
-        
-        async redeemVoucher(voucherId) {
-            try {
-                const response = await fetch(`/api/vouchers/${voucherId}/redeem`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Failed to redeem voucher: ${response.status}`);
-                }
-                
-                const redeemedVoucher = await response.json();
-                
-                // Update the voucher in the store
-                this.vouchers = this.vouchers.map(voucher => 
-                    voucher.id === voucherId ? redeemedVoucher : voucher
-                );
-                
-                return redeemedVoucher;
-            } catch (error) {
-                console.error('Error redeeming voucher:', error);
-                throw error;
-            }
-        }
-    },
+export const useVoucherStore = defineStore('voucher', () => {
+  const vouchers = ref([]);
+  
+  function setVouchers(newVouchers) {
+    vouchers.value = newVouchers;
+  }
+  
+  async function redeemVoucher(voucherId) {
+    try {
+      const updatedVoucher = await apiRedeemVoucher(voucherId);
+      
+      // Update the voucher in the store
+      const index = vouchers.value.findIndex(v => v.id === voucherId);
+      if (index !== -1) {
+        vouchers.value[index] = updatedVoucher;
+      }
+      
+      return updatedVoucher;
+    } catch (error) {
+      console.error('Error redeeming voucher:', error);
+      throw error;
+    }
+  }
+  
+  return {
+    vouchers,
+    setVouchers,
+    redeemVoucher
+  };
 });
