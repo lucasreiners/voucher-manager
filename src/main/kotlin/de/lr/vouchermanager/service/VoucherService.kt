@@ -2,6 +2,7 @@ package de.lr.vouchermanager.service
 
 import de.lr.vouchermanager.api.model.VoucherResponse
 import de.lr.vouchermanager.data.VoucherEntity
+import de.lr.vouchermanager.data.ShopEntity
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -27,6 +28,17 @@ class VoucherService {
                 }
                 voucher.toResponse()
             }
+        }
+
+    suspend fun createVoucher(shopId: UUID, code: String): VoucherResponse =
+        transaction {
+            addLogger(StdOutSqlLogger)
+            val shop = ShopEntity.findById(shopId) ?: throw IllegalArgumentException("Shop not found")
+            VoucherEntity.new {
+                this.code = code
+                this.shop = shop
+                this.createdAt = Instant.now()
+            }.toResponse()
         }
 }
 

@@ -43,3 +43,19 @@ export const redeemVoucher = async (voucherId) => {
     throw error;
   }
 };
+
+export async function createVoucher({ shopId, code }) {
+  const response = await fetch(`${API_BASE_URL}/vouchers`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ shopId, code }),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to create voucher');
+  }
+  
+  return response.json();
+}

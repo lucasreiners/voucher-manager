@@ -1,19 +1,19 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
-import { useVoucherStore } from '../state/voucherStore';
+import { ref, computed, watch, onMounted } from "vue";
+import { useVoucherStore } from "../state/voucherStore";
+import { useRouter } from 'vue-router';
 import VoucherCard from '../components/voucher/VoucherCard.vue';
 import ConfirmDialog from '../components/layout/ConfirmDialog.vue';
-import { redeemVoucher as apiRedeemVoucher } from '../services/apiService';
 
 const props = defineProps({
-  shop: {
-    type: Object,
-    required: true
-  }
+	shop: {
+		type: Object,
+		required: true,
+	},
 });
 
-const emit = defineEmits(['close']);
-
+const emit = defineEmits(["close"]);
+const router = useRouter();
 const voucherStore = useVoucherStore();
 const isRedeeming = ref(false);
 const redeemError = ref(null);
@@ -59,18 +59,28 @@ const closeConfirmDialog = () => {
 const handleRedeem = () => {
   openConfirmDialog();
 };
+
+const goToAddVoucher = () => {
+  router.push(`/shops/${props.shop.id}/add-voucher`);
+};
 </script>
 
 <template>
   <div class="shop-detail">
-    <button class="back-button" @click="closeShopDetails">Zurück zur Shop Übersicht</button>
-    
+    <button class="back-button" @click="closeShopDetails">Back to shops</button>
     <div
-      class="shop-header"
-      :style="{ backgroundColor: shop.backgroundColor }"
+        class="shop-header"
+        :style="{ backgroundColor: shop.backgroundColor }"
     >
-      <img :src="shop.iconUrl" alt="Shop Icon" class="shop-detail-icon" crossorigin="anonymous"/>
+      <img :src="shop.iconUrl" alt="Shop icon" class="shop-detail-icon" crossorigin="anonymous"/>
       <h2>{{ shop.name }}</h2>
+    </div>
+
+    <!-- Add Voucher Button -->
+    <div class="action-container">
+      <button class="add-voucher-button" @click="goToAddVoucher">
+        Add New Voucher
+      </button>
     </div>
 
     <!-- Voucher Card -->
@@ -139,6 +149,27 @@ const handleRedeem = () => {
   padding: 0.5rem 1rem;
   background-color: #ffebee;
   border-radius: 4px;
+}
+
+.action-container {
+  padding: 1rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.add-voucher-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-voucher-button:hover {
+  background-color: #45a049;
 }
 
 @media (max-width: 768px) {

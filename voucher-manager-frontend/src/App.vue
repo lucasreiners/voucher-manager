@@ -4,6 +4,7 @@ import { useVoucherStore } from './state/voucherStore';
 import { useShopStore } from './state/shopStore';
 import { fetchShops, fetchVouchers } from './services/apiService';
 import HomeView from './views/HomeView.vue';
+import AppHeader from './components/layout/AppHeader.vue'
 
 const voucherStore = useVoucherStore();
 const shopStore = useShopStore();
@@ -22,9 +23,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main>
-    <HomeView />
-  </main>
+  <div id="app">
+    <AppHeader />
+    <main>
+      <router-view></router-view>
+    </main>
+  </div>
 </template>
 
 <style>
@@ -33,5 +37,12 @@ onMounted(async () => {
 main {
   width: 100%;
   min-height: 100vh;
+}
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-weight: normal;
 }
 </style>

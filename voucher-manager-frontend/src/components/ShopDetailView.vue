@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
 import { useVoucherStore } from "../state/voucherStore";
+import VoucherForm from "./voucher/VoucherForm.vue";
 import JsBarcode from "jsbarcode";
 
 const props = defineProps({
@@ -106,6 +107,12 @@ const closeConfirmDialog = () => {
     >
       <img :src="shop.iconUrl" alt="Shop icon" class="shop-detail-icon" crossorigin="anonymous"/>
       <h2>{{ shop.name }}</h2>
+    </div>
+
+    <!-- Add Voucher Form -->
+    <div class="voucher-form-container">
+      <h3>Add New Voucher</h3>
+      <VoucherForm :shopId="shop.id" />
     </div>
 
     <!-- First Voucher as Card with Barcode -->
@@ -348,6 +355,19 @@ const closeConfirmDialog = () => {
 .cancel-button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+.voucher-form-container {
+  padding: 1rem;
+  margin-bottom: 2rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+.voucher-form-container h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
 }
 
 @media (max-width: 768px) {

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { redeemVoucher as apiRedeemVoucher } from '../services/apiService';
+import { redeemVoucher as apiRedeemVoucher, createVoucher as apiCreateVoucher } from '../services/apiService';
 
 export const useVoucherStore = defineStore('voucher', () => {
   const vouchers = ref([]);
@@ -25,10 +25,22 @@ export const useVoucherStore = defineStore('voucher', () => {
       throw error;
     }
   }
+
+  async function createVoucher(voucherData) {
+    try {
+      const newVoucher = await apiCreateVoucher(voucherData);
+      vouchers.value = [...vouchers.value, newVoucher];
+      return newVoucher;
+    } catch (error) {
+      console.error('Error creating voucher:', error);
+      throw error;
+    }
+  }
   
   return {
     vouchers,
     setVouchers,
-    redeemVoucher
+    redeemVoucher,
+    createVoucher
   };
 });
