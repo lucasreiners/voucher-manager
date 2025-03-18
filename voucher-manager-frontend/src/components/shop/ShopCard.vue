@@ -1,37 +1,34 @@
-<script setup>
-defineProps({
-  shop: {
-    type: Object,
-    required: true
-  }
-});
+<script setup lang="ts">
+import type { Shop } from '../../types';
+
+interface Props {
+  shop: Shop;
+}
+
+defineProps<Props>();
 </script>
 
 <template>
-  <div 
-    class="shop-card"
-    :style="{ backgroundColor: shop.backgroundColor }"
-  >
-    <img :src="shop.iconUrl" alt="Shop icon" class="shop-icon" crossorigin="anonymous"/>
-    <h2>{{ shop.name }}</h2>
+  <div class="shop-card" :style="{ backgroundColor: shop.backgroundColor }">
+    <img :src="shop.iconUrl" :alt="shop.name" class="shop-icon" crossorigin="anonymous" />
+    <h3>{{ shop.name }}</h3>
   </div>
 </template>
 
 <style scoped>
 .shop-card {
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s;
   display: flex;
   flex-direction: column;
   align-items: center;
-  cursor: pointer;
-  transition: transform 0.2s;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   color: white;
 }
 
 .shop-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-2px);
 }
 
 .shop-icon {
@@ -39,6 +36,11 @@ defineProps({
   height: 80px;
   object-fit: contain;
   margin-bottom: 1rem;
+}
+
+h3 {
+  margin: 0;
+  text-align: center;
 }
 
 @media (max-width: 768px) {

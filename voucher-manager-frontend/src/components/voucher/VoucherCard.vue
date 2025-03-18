@@ -1,21 +1,20 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from "vue";
 import JsBarcode from "jsbarcode";
+import type { Voucher } from '../../types';
 
-const props = defineProps({
-	voucher: {
-		type: Object,
-		required: true,
-	},
-});
+interface Props {
+  voucher: Voucher;
+}
 
+const props = defineProps<Props>();
 const emit = defineEmits(["redeem"]);
-const barcodeRef = ref(null);
+const barcodeRef = ref<SVGSVGElement | null>(null);
 
 onMounted(() => {
-	if (barcodeRef.value) {
-		renderBarcode();
-	}
+  if (barcodeRef.value) {
+    renderBarcode();
+  }
 });
 
 const renderBarcode = () => {
@@ -47,10 +46,15 @@ const handleRedeem = () => {
 
 <template>
   <div class="voucher-card">
+    
+    <h3>Guthabenkarte</h3>
+    
     <div class="barcode-wrapper">
       <svg class="barcode" ref="barcodeRef"></svg>
     </div>
-    <p class="voucher-code">{{ voucher.code }}</p>    
+
+    <span class="voucher-code">{{ voucher.code }}</span>
+    
     <button 
       v-if="!voucher.redeemedAt" 
       class="redeem-button" 
@@ -58,10 +62,6 @@ const handleRedeem = () => {
     >
       Guthaben verbraucht
     </button>
-    
-    <p v-else class="redemption-date">
-      Verbraucht am {{ new Date(voucher.redeemedAt).toLocaleDateString() }}
-    </p>
   </div>
 </template>
 
@@ -77,11 +77,19 @@ const handleRedeem = () => {
   width: 100%;
 }
 
+.voucher-code {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 1rem 0;
+  color: #000000;
+  text-align: center;
+}
+
 .barcode-wrapper {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-bottom: 1rem;
+  margin: 1.5rem 0;
   padding: 1rem;
   background-color: white;
 }
@@ -90,28 +98,6 @@ const handleRedeem = () => {
   width: 100%;
   height: auto;
   min-height: 80px;
-}
-
-.voucher-code {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin: 0.5rem 0;
-  color: #000000;
-}
-
-.voucher-status {
-  margin-top: 0.5rem;
-  padding: 0.25rem 0.75rem;
-  background-color: #e0e0e0;
-  border-radius: 1rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #333333;
-}
-
-.voucher-status.redeemed {
-  background-color: #ffcdd2;
-  color: #c62828;
 }
 
 .redeem-button {
@@ -128,12 +114,6 @@ const handleRedeem = () => {
 
 .redeem-button:hover {
   background-color: #45a049;
-}
-
-.redemption-date {
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
-  color: #666;
 }
 
 @media (max-width: 768px) {

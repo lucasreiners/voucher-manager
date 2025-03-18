@@ -1,9 +1,10 @@
-<script setup>
+<script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
 import VoucherForm from '../components/voucher/VoucherForm.vue';
 
 const route = useRoute();
 const router = useRouter();
+const shopId = route.params.shopId as string;
 
 const handleVoucherAdded = () => {
   router.push(`/shops/${route.params.shopId}`);
@@ -11,23 +12,21 @@ const handleVoucherAdded = () => {
 </script>
 
 <template>
-  <v-container fluid class="pa-4">
-    <v-row justify="center">
-      <v-col cols="12" sm="8" md="6">
-        <v-card class="pa-4">
-          <v-card-title class="text-h5 mb-4">
-            Add New Voucher
-          </v-card-title>
-          <VoucherForm 
-            :shopId="route.params.shopId" 
-            @voucher-added="handleVoucherAdded"
-          />
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
+  <div class="add-voucher-view">
+    <h2>Add New Voucher</h2>
+    <VoucherForm 
+      :shopId="shopId" 
+      @voucher-added="handleVoucherAdded"
+    />
+  </div>
 </template>
 
 <style scoped>
-/* Remove previous styles as they're no longer needed */
+.add-voucher-view {
+  padding: 1rem;
+}
+
+h2 {
+  margin-bottom: 1rem;
+}
 </style>

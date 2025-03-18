@@ -1,35 +1,36 @@
-<script setup>
-import { ref, computed, onMounted } from "vue";
+<script setup lang="ts">
+import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { useVoucherStore } from "../state/voucherStore";
-import { useShopStore } from "../state/shopStore";
-import VoucherCard from '../components/voucher/VoucherCard.vue';
+import { useShopStore } from '../state/shopStore';
+import { useVoucherStore } from '../state/voucherStore';
+import type { Shop, Voucher } from '../types';
 import ConfirmDialog from '../components/layout/ConfirmDialog.vue';
+import VoucherCard from '../components/voucher/VoucherCard.vue';
 
 const route = useRoute();
-const voucherStore = useVoucherStore();
 const shopStore = useShopStore();
+const voucherStore = useVoucherStore();
+
+const shop = computed((): Shop | undefined => {
+  return shopStore.shops.find((s) => s.id === route.params.id);
+});
+
+// Modified to only include unredeemed vouchers
+const firstUnredeemedVoucher = computed((): Voucher | undefined => {
+  return voucherStore.vouchers
+    .filter((v) => v.shopId === shop.value?.id && !v.redeemedAt)
+    .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt))[0];
+});
 
 const isRedeeming = ref(false);
-const redeemError = ref(null);
+const redeemError = ref<string | null>(null);
 const showConfirmDialog = ref(false);
 
-const shop = computed(() => {
-  return shopStore.shops.find(s => s.id === route.params.id);
-});
-
-const firstUnredeemedVoucher = computed(() => {
-  if (!shop.value) return null;
-  return voucherStore.vouchers
-    .filter((v) => v.shopId === shop.value.id && !v.redeemedAt)
-    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0] 
-    || voucherStore.vouchers.find((v) => v.shopId === shop.value.id);
-});
-
-const redeemVoucher = async () => {
+const handleConfirm = async (): Promise<void> => {
   if (!firstUnredeemedVoucher.value || firstUnredeemedVoucher.value.redeemedAt) {
     return;
   }
+
   try {
     isRedeeming.value = true;
     redeemError.value = null;
@@ -37,22 +38,14 @@ const redeemVoucher = async () => {
     showConfirmDialog.value = false;
   } catch (error) {
     redeemError.value = "Gutschein konnte nicht als verbraucht markiert werden. Bitte versuchen Sie es erneut.";
-    console.error("Redemption error:", error);
+    console.error('Error redeeming voucher:', error);
   } finally {
     isRedeeming.value = false;
   }
 };
 
-const openConfirmDialog = () => {
-  showConfirmDialog.value = true;
-};
-
-const closeConfirmDialog = () => {
+const handleCancel = (): void => {
   showConfirmDialog.value = false;
-};
-
-const handleRedeem = () => {
-  openConfirmDialog();
 };
 </script>
 
@@ -73,11 +66,11 @@ const handleRedeem = () => {
         <h2>{{ shop.name }}</h2>
       </div>
 
-      <!-- Voucher Card -->
+      <!-- Voucher Card - Only shown if there's an unredeemed voucher -->
       <div class="featured-voucher-container" v-if="firstUnredeemedVoucher">
         <VoucherCard 
           :voucher="firstUnredeemedVoucher" 
-          @redeem="handleRedeem"
+          @redeem="showConfirmDialog = true"
         />
         
         <v-alert
@@ -88,15 +81,22 @@ const handleRedeem = () => {
           {{ redeemError }}
         </v-alert>
       </div>
+      
+      <!-- No unredeemed vouchers message -->
+      <div v-else-if="shop" class="no-vouchers-message">
+        <v-alert type="info" class="mx-4">
+          Keine aktiven Gutscheine für diesen Shop verfügbar.
+        </v-alert>
+      </div>
 
       <!-- Confirmation Dialog -->
       <ConfirmDialog
-        v-if="showConfirmDialog"
+        :show="showConfirmDialog"
         title="Als verbraucht markieren"
         message="Sind Sie sicher, dass Sie diesen Gutschein als verbraucht markieren wollen?"
-        :isLoading="isRedeeming"
-        @confirm="redeemVoucher"
-        @cancel="closeConfirmDialog"
+        @update:show="(value) => showConfirmDialog = value"
+        @confirm="handleConfirm"
+        @cancel="handleCancel"
       />
     </div>
   </v-container>
@@ -155,5 +155,11 @@ const handleRedeem = () => {
     font-size: 1.2rem;
     text-align: center;
   }
+}
+
+.no-vouchers-message {
+  margin: 2rem auto;
+  max-width: 600px;
+  width: 100%;
 }
 </style>

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { useShopStore } from '../state/shopStore';
 import AppHeader from '../components/layout/AppHeader.vue';
@@ -7,19 +7,19 @@ import ShopList from '../components/shop/ShopList.vue';
 const router = useRouter();
 const shopStore = useShopStore();
 
-const showShopDetails = (shop) => {
+const showShopDetails = (shop: { id: string }) => {
   router.push(`/shops/${shop.id}`);
 };
 </script>
 
 <template>
-  <v-container fluid class="home-container pa-4">
+  <main>
     <AppHeader title="Shops" />
     <ShopList 
       :shops="shopStore.shops" 
       @shopSelected="showShopDetails"
     />
-  </v-container>
+  </main>
 </template>
 
 <style scoped>

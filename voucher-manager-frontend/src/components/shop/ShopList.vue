@@ -1,45 +1,55 @@
-<script setup>
+<script setup lang="ts">
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useShopStore } from '../../state/shopStore';
+import type { Shop } from '../../types';
 import ShopCard from './ShopCard.vue';
 
-defineProps({
-  shops: {
-    type: Array,
-    required: true
-  }
+const router = useRouter();
+const shopStore = useShopStore();
+
+onMounted(async (): Promise<void> => {
+  await shopStore.loadShops();
 });
 
-const emit = defineEmits(['shopSelected']);
-
-const selectShop = (shop) => {
-  emit('shopSelected', shop);
+const handleShopClick = (shop: Shop): void => {
+  router.push(`/shops/${shop.id}`);
 };
 </script>
 
 <template>
   <div class="shop-list">
-    <div 
-      v-for="shop in shops" 
-      :key="shop.id"
-      @click="selectShop(shop)"
-    >
-      <ShopCard :shop="shop" />
+    <div v-if="shopStore.isLoading" class="loading">Loading shops...</div>
+    <div v-else-if="shopStore.error" class="error">{{ shopStore.error }}</div>
+    <div v-else class="shops-grid">
+      <ShopCard
+        v-for="shop in shopStore.shops"
+        :key="shop.id"
+        :shop="shop"
+        @click="handleShopClick(shop)"
+      />
     </div>
   </div>
 </template>
 
 <style scoped>
 .shop-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1rem;
+  padding: 1rem;
 }
 
-@media (max-width: 768px) {
-  .shop-list {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    margin: 1rem 0.5rem;
-  }
+.shops-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.loading, .error {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+}
+
+.error {
+  color: #d32f2f;
 }
 </style>

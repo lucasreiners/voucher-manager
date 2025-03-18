@@ -1,10 +1,9 @@
-<script setup>
-defineProps({
-  title: {
-    type: String,
-    default: 'Voucher Manager'
-  }
-});
+<script setup lang="ts">
+interface Props {
+  title: string;
+}
+
+defineProps<Props>();
 </script>
 
 <template>
@@ -15,20 +14,13 @@ defineProps({
 
 <style scoped>
 .app-header {
-  padding: 1rem 0;
-  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
 }
 
-.app-header h1 {
-  font-size: 1.8rem;
-  font-weight: 700;
+h1 {
   margin: 0;
-}
-
-@media (max-width: 480px) {
-  .app-header h1 {
-    font-size: 1.5rem;
-    text-align: center;
-  }
+  font-size: 1.5rem;
 }
 </style>

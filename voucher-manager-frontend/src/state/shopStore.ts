@@ -1,17 +1,18 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, Ref } from 'vue';
 import { fetchShops } from '../services/apiService';
+import type { Shop } from '../types';
 
 export const useShopStore = defineStore('shop', () => {
-  const shops = ref([]);
-  const isLoading = ref(false);
-  const error = ref(null);
+  const shops: Ref<Shop[]> = ref([]);
+  const isLoading: Ref<boolean> = ref(false);
+  const error: Ref<string | null> = ref(null);
   
-  function setShops(newShops) {
+  function setShops(newShops: Shop[]): void {
     shops.value = newShops;
   }
   
-  async function loadShops() {
+  async function loadShops(): Promise<void> {
     isLoading.value = true;
     error.value = null;
     
@@ -19,7 +20,7 @@ export const useShopStore = defineStore('shop', () => {
       const shopsData = await fetchShops();
       shops.value = shopsData;
     } catch (e) {
-      error.value = e.message || 'Failed to load shops';
+      error.value = (e as Error).message || 'Failed to load shops';
       console.error('Error loading shops:', e);
     } finally {
       isLoading.value = false;

@@ -1,54 +1,46 @@
-<script setup>
-defineProps({
-  title: {
-    type: String,
-    default: 'Bestätigen'
-  },
-  message: {
-    type: String,
-    required: true
-  },
-  isLoading: {
-    type: Boolean,
-    default: false
-  }
+<script setup lang="ts">
+interface Props {
+  show: boolean;
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  confirmText: 'Confirm',
+  cancelText: 'Cancel'
 });
 
-const emit = defineEmits(['confirm', 'cancel']);
+const emit = defineEmits<{
+  (e: 'confirm'): void;
+  (e: 'cancel'): void;
+  (e: 'update:show', value: boolean): void;
+}>();
 
-const handleConfirm = () => {
+const handleConfirm = (): void => {
   emit('confirm');
+  emit('update:show', false);
 };
 
-const handleCancel = () => {
+const handleCancel = (): void => {
   emit('cancel');
+  emit('update:show', false);
 };
 </script>
 
 <template>
-  <div class="modal-container">
-    <div class="modal-overlay" @click="handleCancel"></div>
-    <div class="confirm-dialog">
-      <h3>{{ title }}</h3>
-      <p>{{ message }}</p>
-      <div class="dialog-buttons">
-        <button 
-          class="cancel-button" 
-          @click="handleCancel" 
-          :disabled="isLoading"
-        >
-          Abbrechen
-        </button>
-        <button 
-          class="confirm-button" 
-          @click="handleConfirm" 
-          :disabled="isLoading"
-        >
-          {{ isLoading ? 'Verarbeite...' : 'Bestätigen' }}
-        </button>
-      </div>
-    </div>
-  </div>
+  <v-dialog :model-value="show" @update:model-value="(value) => emit('update:show', value)" max-width="500px">
+    <v-card>
+      <v-card-title>{{ title }}</v-card-title>
+      <v-card-text>{{ message }}</v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="grey" text @click="handleCancel">{{ cancelText }}</v-btn>
+        <v-btn color="primary" @click="handleConfirm">{{ confirmText }}</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style scoped>

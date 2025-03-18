@@ -1,105 +1,113 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
 import { useVoucherStore } from "../state/voucherStore";
 import VoucherForm from "./voucher/VoucherForm.vue";
 import JsBarcode from "jsbarcode";
+import { useRoute } from 'vue-router';
+import { useShopStore } from '../state/shopStore';
+import type { Shop, Voucher } from '../types';
+import VoucherCard from './voucher/VoucherCard.vue';
 
-const props = defineProps({
-	shop: {
-		type: Object,
-		required: true,
-	},
-});
-
-const emit = defineEmits(["close"]);
-
+const route = useRoute();
+const shopStore = useShopStore();
 const voucherStore = useVoucherStore();
-const barcodeRef = ref(null);
+
+const barcodeRef = ref<SVGSVGElement | null>(null);
 const isRedeeming = ref(false);
-const redeemError = ref(null);
+const redeemError = ref<string | null>(null);
 const showConfirmDialog = ref(false);
 
-const firstShopVoucher = computed(() => {
-	return voucherStore.vouchers.find((v) => v.shopId === props.shop.id);
+const shop = computed((): Shop | undefined => {
+  return shopStore.shops.find((s) => s.id === route.params.id);
 });
+
+const firstShopVoucher = computed((): Voucher | undefined => {
+  return voucherStore.vouchers.find((v) => v.shop.id === shop.value?.id);
+});
+
+// Define emits
+const emit = defineEmits<{
+  (e: 'close'): void;
+}>();
 
 // Use onMounted to ensure the DOM is ready
 onMounted(() => {
-	if (firstShopVoucher.value && barcodeRef.value) {
-		// Give DOM time to render
-		setTimeout(renderBarcode, 200);
-	}
+  if (firstShopVoucher.value && barcodeRef.value) {
+    // Give DOM time to render
+    setTimeout(renderBarcode, 200);
+  }
 });
 
 // Watch for changes to render barcode when available
 watch(firstShopVoucher, (newVal) => {
-	if (newVal && barcodeRef.value) {
-		setTimeout(renderBarcode, 200);
-	}
+  if (newVal && barcodeRef.value) {
+    setTimeout(renderBarcode, 200);
+  }
 });
 
 const renderBarcode = () => {
-	if (barcodeRef.value && firstShopVoucher.value) {
-		try {
-			// Clear previous content
-			while (barcodeRef.value.firstChild) {
-				barcodeRef.value.removeChild(barcodeRef.value.firstChild);
-			}
+  if (barcodeRef.value && firstShopVoucher.value) {
+    try {
+      const element = barcodeRef.value;
+      // Clear previous content
+      while (element.firstChild) {
+        element.removeChild(element.firstChild);
+      }
 
-			JsBarcode(barcodeRef.value, firstShopVoucher.value.code, {
-				format: "CODE128",
-				lineColor: "#000",
-				width: 2,
-				height: 80,
-				displayValue: false,
-				background: "#ffffff",
-			});
+      JsBarcode(element, firstShopVoucher.value.code, {
+        format: "CODE128",
+        lineColor: "#000",
+        width: 2,
+        height: 80,
+        displayValue: false,
+        background: "#ffffff",
+      });
 
-			console.log("Barcode rendered for:", firstShopVoucher.value.code);
-		} catch (e) {
-			console.error("Error generating barcode:", e);
-		}
-	} else {
-		console.log("Cannot render barcode - missing ref or voucher", {
-			ref: !!barcodeRef.value,
-			voucher: !!firstShopVoucher.value,
-		});
-	}
+      console.log("Barcode rendered for:", firstShopVoucher.value.code);
+    } catch (e) {
+      console.error("Error generating barcode:", e);
+    }
+  } else {
+    console.log("Cannot render barcode - missing ref or voucher", {
+      ref: !!barcodeRef.value,
+      voucher: !!firstShopVoucher.value,
+    });
+  }
 };
 
 const closeShopDetails = () => {
-	emit("close");
+  emit("close");
 };
 
 const redeemVoucher = async () => {
-	if (!firstShopVoucher.value || firstShopVoucher.value.redeemedAt) {
-		return;
-	}
+  if (!firstShopVoucher.value || firstShopVoucher.value.redeemedAt) {
+    return;
+  }
 
-	try {
-		isRedeeming.value = true;
-		redeemError.value = null;
-		await voucherStore.redeemVoucher(firstShopVoucher.value.id);
-		showConfirmDialog.value = false;
-	} catch (error) {
-		redeemError.value = "Failed to redeem voucher. Please try again.";
-		console.error("Redemption error:", error);
-	} finally {
-		isRedeeming.value = false;
-	}
+  try {
+    isRedeeming.value = true;
+    redeemError.value = null;
+    await voucherStore.loadVouchers();
+    showConfirmDialog.value = false;
+  } catch (error) {
+    redeemError.value = "Failed to redeem voucher. Please try again.";
+    console.error("Redemption error:", error);
+  } finally {
+    isRedeeming.value = false;
+  }
 };
 
 const openConfirmDialog = () => {
-	showConfirmDialog.value = true;
+  showConfirmDialog.value = true;
 };
 
 const closeConfirmDialog = () => {
-	showConfirmDialog.value = false;
+  showConfirmDialog.value = false;
 };
 </script>
 
 <template>
-  <div class="shop-detail">
+  <div v-if="shop" class="shop-detail">
     <button class="back-button" @click="closeShopDetails">Back to shops</button>
     <div
         class="shop-header"

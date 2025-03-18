@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 import { onMounted } from 'vue';
 import { useVoucherStore } from './state/voucherStore';
@@ -11,17 +11,17 @@ const route = useRoute();
 const voucherStore = useVoucherStore();
 const shopStore = useShopStore();
 
-const isShopDetail = computed(() => {
+const isShopDetail = computed((): boolean => {
   return route.name === 'shop-detail';
 });
 
-const goToAddVoucher = () => {
+const goToAddVoucher = (): void => {
   if (isShopDetail.value) {
     router.push(`/shops/${route.params.id}/add-voucher`);
   }
 };
 
-onMounted(async () => {
+onMounted(async (): Promise<void> => {
   try {
     const vouchersData = await fetchVouchers();
     voucherStore.setVouchers(vouchersData);

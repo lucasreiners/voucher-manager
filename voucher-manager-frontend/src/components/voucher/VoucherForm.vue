@@ -1,58 +1,53 @@
-<script setup>
-import { ref } from 'vue'
-import { useVoucherStore } from '@/state/voucherStore'
+<script setup lang="ts">
+import { ref } from 'vue';
+import { createVoucher } from '../../services/apiService';
+import { useVoucherStore } from '../../state/voucherStore';
 
-const props = defineProps({
-  shopId: {
-    type: String,
-    required: true
-  }
-})
-
-const emit = defineEmits(['voucher-added'])
-const voucherStore = useVoucherStore()
-const code = ref('')
-
-const createVoucher = async () => {
-  if (!code.value) return
-  
-  try {
-    const newVoucher = await voucherStore.createVoucher({
-      shopId: props.shopId,
-      code: code.value
-    })
-    code.value = ''
-    emit('voucher-added', newVoucher)
-  } catch (error) {
-    console.error('Failed to create voucher:', error)
-  }
+interface Props {
+  shopId: string;
 }
+
+const props = defineProps<Props>();
+const voucherStore = useVoucherStore();
+
+const voucherCode = ref<string>('');
+const isSubmitting = ref<boolean>(false);
+const error = ref<string | null>(null);
+
+const handleSubmit = async (e: Event): Promise<void> => {
+  e.preventDefault();
+  if (!voucherCode.value.trim()) return;
+
+  isSubmitting.value = true;
+  error.value = null;
+
+  try {
+    const newVoucher = await createVoucher(props.shopId, voucherCode.value);
+    voucherStore.vouchers.push(newVoucher);
+    voucherCode.value = '';
+  } catch (e) {
+    error.value = (e as Error).message || 'Failed to create voucher';
+  } finally {
+    isSubmitting.value = false;
+  }
+};
 </script>
 
 <template>
-  <form @submit.prevent="createVoucher" class="voucher-form">
-    <v-row>
-      <v-col cols="12" sm="8">
-        <v-text-field
-          v-model="code"
-          label="Gutschein-Code"
-          placeholder="Gutschein-Code eingeben"
-          required
-          hide-details
-          variant="outlined"
-          density="comfortable"
-        />
-      </v-col>
-      <v-col cols="12" sm="4" class="d-flex align-center">
-        <v-btn
-          type="submit"
-          color="success"
-          block
-        >
-          Hinzufügen
-        </v-btn>
-      </v-col>
-    </v-row>
+  <form @submit="handleSubmit" class="voucher-form">
+    <div class="form-group">
+      <input
+        v-model="voucherCode"
+        type="text"
+        placeholder="Enter voucher code"
+        :disabled="isSubmitting"
+        class="voucher-input"
+      />
+      <button type="submit" :disabled="isSubmitting || !voucherCode.trim()" class="submit-button">
+        {{ isSubmitting ? 'Creating...' : 'Create Voucher' }}
+      </button>
+    </div>
+    <p v-if="error" class="error-message">{{ error }}</p>
   </form>
 </template>
 
