@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useShopStore } from '../state/shopStore';
 import { useVoucherStore } from '../state/voucherStore';
+import { useScreenBrightness } from '../composables/useScreenBrightness';
 import type { Shop, Voucher } from '../types';
 import ConfirmDialog from '../components/layout/ConfirmDialog.vue';
 import VoucherCard from '../components/voucher/VoucherCard.vue';
@@ -10,6 +11,7 @@ import VoucherCard from '../components/voucher/VoucherCard.vue';
 const route = useRoute();
 const shopStore = useShopStore();
 const voucherStore = useVoucherStore();
+const { setMaxBrightness, resetBrightness } = useScreenBrightness();
 
 const shop = computed((): Shop | undefined => {
   return shopStore.shops.find((s) => s.id === route.params.id);
@@ -20,6 +22,27 @@ const firstUnredeemedVoucher = computed((): Voucher | undefined => {
   return voucherStore.vouchers
     .filter((v) => v.shopId === shop.value?.id && !v.redeemedAt)
     .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt))[0];
+});
+
+// Watch for changes in unredeemed vouchers to manage brightness
+watch(firstUnredeemedVoucher, (newVal) => {
+  if (newVal) {
+    setMaxBrightness();
+  } else {
+    resetBrightness();
+  }
+});
+
+// Set initial brightness
+onMounted(() => {
+  if (firstUnredeemedVoucher.value) {
+    setMaxBrightness();
+  }
+});
+
+// Reset brightness when leaving the view
+onBeforeUnmount(() => {
+  resetBrightness();
 });
 
 const isRedeeming = ref(false);
