@@ -1,142 +1,70 @@
-<script setup>
-import { useVoucherStore } from "./state/voucherStore";
-import { useShopStore } from "./state/shopStore";
-import { onMounted, ref } from "vue";
-import ShopDetailView from "./components/ShopDetailView.vue";
+<script setup lang="ts">
+import { computed } from 'vue';
+import { onMounted } from 'vue';
+import { useVoucherStore } from './state/voucherStore';
+import { useShopStore } from './state/shopStore';
+import { fetchShops, fetchVouchers } from './services/apiService';
+import { useRouter, useRoute } from 'vue-router';
 
+const router = useRouter();
+const route = useRoute();
 const voucherStore = useVoucherStore();
 const shopStore = useShopStore();
-const selectedShop = ref(null);
 
-const showShopDetails = (shop) => {
-	selectedShop.value = shop;
+const isShopDetail = computed((): boolean => {
+  return route.name === 'shop-detail';
+});
+
+const goToAddVoucher = (): void => {
+  if (isShopDetail.value) {
+    router.push(`/shops/${route.params.id}/add-voucher`);
+  }
 };
 
-const closeShopDetails = () => {
-	selectedShop.value = null;
-};
-
-onMounted(async () => {
-	try {
-		const response = await fetch("/api/vouchers");
-		if (!response.ok) {
-			throw new Error(`HTTP error! Status: ${response.status}`);
-		}
-		const data = await response.json();
-		voucherStore.setVouchers(data);
-	} catch (error) {
-		console.error("Failed to fetch vouchers:", error);
-	}
-
-	try {
-		const response = await fetch("/api/shops");
-		if (!response.ok) {
-			throw new Error(`HTTP error! Status: ${response.status}`);
-		}
-		const data = await response.json();
-		shopStore.setShops(data);
-	} catch (error) {
-		console.error("Failed to fetch shops:", error);
-	}
+onMounted(async (): Promise<void> => {
+  try {
+    const vouchersData = await fetchVouchers();
+    voucherStore.setVouchers(vouchersData);
+    
+    const shopsData = await fetchShops();
+    shopStore.setShops(shopsData);
+  } catch (error) {
+    console.error('Error loading application data:', error);
+  }
 });
 </script>
 
 <template>
-  <main>
-    <h1>Shops</h1>
+  <v-app>
+    <v-app-bar color="white" text-color="black" elevation="2">
+      <template v-slot:prepend>
+        <v-app-bar-nav-icon 
+          v-if="router.currentRoute.value.path.includes('/shops/')" 
+          @click="router.back()"
+        >
+          <v-icon color="black">mdi-arrow-left</v-icon>
+        </v-app-bar-nav-icon>
+      </template>
+      
+      <v-app-bar-title class="text-black">Voucher Manager</v-app-bar-title>
 
-    <!-- Shop List -->
-    <div class="shop-list" v-if="!selectedShop">
-      <div
-          v-for="shop in shopStore.shops"
-          :key="shop.id"
-          class="shop-card"
-          :style="{ backgroundColor: shop.backgroundColor }"
-          @click="showShopDetails(shop)"
-      >
-        <img :src="shop.iconUrl" alt="Shop icon" class="shop-icon" crossorigin="anonymous"/>
-        <h2>{{ shop.name }}</h2>
-      </div>
-    </div>
+      <template v-slot:append>
+        <v-btn
+          v-if="isShopDetail"
+          icon
+          @click="goToAddVoucher"
+        >
+          <v-icon color="black">mdi-plus</v-icon>
+        </v-btn>
+      </template>
+    </v-app-bar>
 
-    <!-- Shop Detail Component -->
-    <ShopDetailView
-        v-if="selectedShop"
-        :shop="selectedShop"
-        @close="closeShopDetails"
-    />
-  </main>
+    <v-main>
+      <router-view></router-view>
+    </v-main>
+  </v-app>
 </template>
 
-<style scoped>
-main {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.shop-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
-}
-
-.shop-card {
-  border-radius: 8px;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  cursor: pointer;
-  transition: transform 0.2s;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  color: white;
-}
-
-.shop-card:hover {
-  transform: translateY(-5px);
-}
-
-.shop-icon {
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
-  margin-bottom: 1rem;
-}
-
-@media (max-width: 768px) {
-  main {
-    padding: 1rem;
-  }
-
-  .shop-list {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    margin: 1rem 0.5rem;
-  }
-
-  .shop-card {
-    padding: 1.5rem;
-    margin: 0 0.5rem;
-    width: calc(100% - 1rem);
-  }
-
-  .shop-icon {
-    width: 60px;
-    height: 60px;
-  }
-
-  .shop-card h2 {
-    font-size: 1rem;
-    text-align: center;
-  }
-}
-
-@media (max-width: 480px) {
-  h1 {
-    font-size: 1.5rem;
-    text-align: center;
-  }
-}
+<style>
+@import './assets/main.css';
 </style>
