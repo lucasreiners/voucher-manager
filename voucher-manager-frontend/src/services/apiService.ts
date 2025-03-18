@@ -36,7 +36,7 @@ export async function createVoucher(shopId: string, code: string): Promise<Vouch
 
 export async function redeemVoucher(voucherId: string): Promise<Voucher> {
   const response = await fetch(`${API_BASE_URL}/api/vouchers/${voucherId}/redeem`, {
-    method: 'POST',
+    method: 'PUT',
   });
   
   if (!response.ok) {

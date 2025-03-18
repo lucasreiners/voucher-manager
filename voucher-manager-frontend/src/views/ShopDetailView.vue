@@ -97,6 +97,8 @@ const handleCancel = (): void => {
         @update:show="(value) => showConfirmDialog = value"
         @confirm="handleConfirm"
         @cancel="handleCancel"
+        confirmText="Ja"
+        cancelText="Abbrechen"
       />
     </div>
   </v-container>

@@ -37,7 +37,7 @@ const handleCancel = (): void => {
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="grey" text @click="handleCancel">{{ cancelText }}</v-btn>
-        <v-btn color="primary" @click="handleConfirm">{{ confirmText }}</v-btn>
+        <v-btn color="on-primary" @click="handleConfirm">{{ confirmText }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
