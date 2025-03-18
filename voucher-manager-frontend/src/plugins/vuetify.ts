@@ -9,7 +9,17 @@ export default createVuetify({
   components,
   directives,
   theme: {
-    defaultTheme: 'light'
+    defaultTheme: 'light',
+    themes: {
+      light: {
+        dark: false,
+        colors: {
+          primary: '#FFFFFF',
+          'primary-darken-1': '#F0F0F0',
+          'on-primary': '#000000',
+        }
+      }
+    }
   },
   icons: {
     defaultSet: 'mdi',

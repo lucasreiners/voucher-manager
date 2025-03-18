@@ -36,17 +36,17 @@ onMounted(async (): Promise<void> => {
 
 <template>
   <v-app>
-    <v-app-bar color="primary" elevation="2">
+    <v-app-bar color="white" text-color="black" elevation="2">
       <template v-slot:prepend>
         <v-app-bar-nav-icon 
           v-if="router.currentRoute.value.path.includes('/shops/')" 
           @click="router.back()"
         >
-          <v-icon>mdi-arrow-left</v-icon>
+          <v-icon color="black">mdi-arrow-left</v-icon>
         </v-app-bar-nav-icon>
       </template>
       
-      <v-app-bar-title>Voucher Manager</v-app-bar-title>
+      <v-app-bar-title class="text-black">Voucher Manager</v-app-bar-title>
 
       <template v-slot:append>
         <v-btn
@@ -54,7 +54,7 @@ onMounted(async (): Promise<void> => {
           icon
           @click="goToAddVoucher"
         >
-          <v-icon>mdi-plus</v-icon>
+          <v-icon color="black">mdi-plus</v-icon>
         </v-btn>
       </template>
     </v-app-bar>

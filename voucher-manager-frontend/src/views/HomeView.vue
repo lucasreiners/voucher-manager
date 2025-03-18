@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { useShopStore } from '../state/shopStore';
-import AppHeader from '../components/layout/AppHeader.vue';
 import ShopList from '../components/shop/ShopList.vue';
 
 const router = useRouter();
@@ -14,7 +13,6 @@ const showShopDetails = (shop: { id: string }) => {
 
 <template>
   <main>
-    <AppHeader title="Shops" />
     <ShopList 
       :shops="shopStore.shops" 
       @shopSelected="showShopDetails"

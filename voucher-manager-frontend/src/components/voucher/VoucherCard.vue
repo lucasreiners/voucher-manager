@@ -60,7 +60,7 @@ const handleRedeem = () => {
       class="redeem-button" 
       @click="handleRedeem"
     >
-      Guthaben verbraucht
+      Guthaben eingelöst?
     </button>
   </div>
 </template>
