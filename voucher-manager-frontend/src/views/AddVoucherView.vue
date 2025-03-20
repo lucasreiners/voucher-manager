@@ -4,10 +4,12 @@ import VoucherForm from "../components/voucher/VoucherForm.vue";
 
 const route = useRoute();
 const router = useRouter();
-const shopId = route.params.shopId as string;
+// Get the id parameter from the route, not shopId
+const shopId = route.params.id as string;
 
 const handleVoucherAdded = () => {
-	router.push(`/shops/${route.params.shopId}`);
+	// Also use id here for consistency
+	router.push(`/shops/${route.params.id}`);
 };
 </script>
 
