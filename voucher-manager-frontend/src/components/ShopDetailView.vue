@@ -26,9 +26,7 @@ const firstShopVoucher = computed((): Voucher | undefined => {
 });
 
 // Define emits
-const emit = defineEmits<{
-	(e: "close"): void;
-}>();
+const emit = defineEmits<(e: "close") => void>();
 
 // Use onMounted to ensure the DOM is ready
 onMounted(() => {

@@ -12,16 +12,24 @@ const route = useRoute();
 const shopStore = useShopStore();
 const voucherStore = useVoucherStore();
 const { setMaxBrightness, resetBrightness } = useScreenBrightness();
+const showRedeemedVouchers = ref(false);
 
 const shop = computed((): Shop | undefined => {
   return shopStore.shops.find((s) => s.id === route.params.id);
 });
 
-// Modified to only include unredeemed vouchers
+// For unredeemed vouchers (active)
 const firstUnredeemedVoucher = computed((): Voucher | undefined => {
   return voucherStore.vouchers
     .filter((v) => v.shopId === shop.value?.id && !v.redeemedAt)
     .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt))[0];
+});
+
+// For redeemed vouchers
+const redeemedVouchers = computed((): Voucher[] => {
+  return voucherStore.vouchers
+    .filter((v) => v.shopId === shop.value?.id && v.redeemedAt)
+    .sort((a, b) => Date.parse(b.redeemedAt || '') - Date.parse(a.redeemedAt || ''));
 });
 
 // Watch for changes in unredeemed vouchers to manage brightness
@@ -70,6 +78,10 @@ const handleConfirm = async (): Promise<void> => {
 const handleCancel = (): void => {
   showConfirmDialog.value = false;
 };
+
+const toggleRedeemedVouchers = (): void => {
+  showRedeemedVouchers.value = !showRedeemedVouchers.value;
+};
 </script>
 
 <template>
@@ -89,8 +101,9 @@ const handleCancel = (): void => {
         <h2>{{ shop.name }}</h2>
       </div>
 
-      <!-- Voucher Card - Only shown if there's an unredeemed voucher -->
+      <!-- Active Voucher Card -->
       <div class="featured-voucher-container" v-if="firstUnredeemedVoucher">
+        <h3 class="section-title">Aktiver Gutschein</h3>
         <VoucherCard 
           :voucher="firstUnredeemedVoucher" 
           @redeem="showConfirmDialog = true"
@@ -105,11 +118,36 @@ const handleCancel = (): void => {
         </v-alert>
       </div>
       
-      <!-- No unredeemed vouchers message -->
+      <!-- No active vouchers message -->
       <div v-else-if="shop" class="no-vouchers-message">
         <v-alert type="info" class="mx-4">
           Keine aktiven Gutscheine für diesen Shop verfügbar.
         </v-alert>
+      </div>
+
+      <!-- Redeemed Vouchers Section -->
+      <div v-if="redeemedVouchers.length > 0" class="redeemed-vouchers-section">
+        <div 
+          class="redeemed-vouchers-header" 
+          @click="toggleRedeemedVouchers"
+          :class="{ 'expanded': showRedeemedVouchers }"
+        >
+          <h3 class="section-title">Eingelöste Gutscheine ({{ redeemedVouchers.length }})</h3>
+          <v-icon>{{ showRedeemedVouchers ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+        </div>
+        
+        <div v-if="showRedeemedVouchers" class="redeemed-vouchers-list">
+          <div 
+            v-for="voucher in redeemedVouchers" 
+            :key="voucher.id" 
+            class="redeemed-voucher-card"
+          >
+            <div class="voucher-code">{{ voucher.code }}</div>
+            <div class="redemption-date">
+              Eingelöst am {{ voucher.redeemedAt ? new Date(voucher.redeemedAt).toLocaleDateString() : 'unbekanntes Datum' }}
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Confirmation Dialog -->
@@ -148,6 +186,14 @@ const handleCancel = (): void => {
   margin-right: 2rem;
 }
 
+.section-title {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  color: #333;
+}
+
 .featured-voucher-container {
   display: flex;
   flex-direction: column;
@@ -157,6 +203,73 @@ const handleCancel = (): void => {
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
+}
+
+.redeemed-vouchers-section {
+  margin: 2rem auto;
+  max-width: 600px;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.redeemed-vouchers-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background-color: #f5f5f5;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.redeemed-vouchers-header:hover {
+  background-color: #eeeeee;
+}
+
+.redeemed-vouchers-header.expanded {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.redeemed-vouchers-header h3 {
+  margin: 0;
+}
+
+.redeemed-vouchers-list {
+  padding: 1rem;
+  background-color: white;
+}
+
+.redeemed-voucher-card {
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  margin-bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  border-left: 4px solid #ffcdd2;
+}
+
+.redeemed-voucher-card:last-child {
+  margin-bottom: 0;
+}
+
+.redeemed-voucher-card .voucher-code {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.redeemed-voucher-card .redemption-date {
+  font-size: 0.9rem;
+  color: #777;
+}
+
+.no-vouchers-message {
+  margin: 2rem auto;
+  max-width: 600px;
+  width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -180,11 +293,13 @@ const handleCancel = (): void => {
     font-size: 1.2rem;
     text-align: center;
   }
-}
-
-.no-vouchers-message {
-  margin: 2rem auto;
-  max-width: 600px;
-  width: 100%;
+  
+  .redeemed-vouchers-header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .redeemed-voucher-card {
+    padding: 0.75rem;
+  }
 }
 </style>
