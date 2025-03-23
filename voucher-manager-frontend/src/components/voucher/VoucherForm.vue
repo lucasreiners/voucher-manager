@@ -12,6 +12,7 @@ const props = defineProps<Props>();
 const voucherStore = useVoucherStore();
 
 const voucherCode = ref<string>('');
+const codeFormat = ref<string>('EAN13'); // Default to EAN format
 const isSubmitting = ref<boolean>(false);
 const error = ref<string | null>(null);
 const showScanner = ref<boolean>(false);
@@ -19,6 +20,27 @@ const scannerRef = ref<HTMLDivElement | null>(null);
 const scannerInstance = ref<Html5Qrcode | null>(null);
 const snackbar = ref<boolean>(false);
 const snackbarMessage = ref<string>('');
+
+// Barcode format options
+const barcodeFormats = [
+  'EAN13',
+  'EAN8',
+  'EAN5',
+  'EAN2',
+  'UPCA',
+  'UPCE',
+  'CODE128',
+  'CODE128A',
+  'CODE128B',
+  'CODE128C',
+  'CODE39',
+  'ITF',
+  'ITF14',
+  'MSI10',
+  'MSI11',
+  'MSI1010',
+  'MSI1110'
+];
 
 const handleSubmit = async (e: Event): Promise<void> => {
   e.preventDefault();
@@ -28,7 +50,11 @@ const handleSubmit = async (e: Event): Promise<void> => {
   error.value = null;
 
   try {
-    const newVoucher = await createVoucher(props.shopId, voucherCode.value);
+    const newVoucher = await createVoucher(
+      props.shopId, 
+      voucherCode.value,
+      codeFormat.value
+    );
     voucherStore.vouchers.push(newVoucher);
     
     // Show success message
@@ -93,8 +119,6 @@ onUnmounted(() => {
 
 <template>
   <v-card class="voucher-form-card">
-    <v-card-title class="text-center">Add New Voucher</v-card-title>
-    
     <v-card-text>
       <form @submit="handleSubmit" class="voucher-form">
         <v-row>
@@ -111,6 +135,18 @@ onUnmounted(() => {
               class="mb-2"
               append-inner-icon="mdi-barcode-scan"
               @click:append-inner="startScanner"
+            />
+          </v-col>
+          
+          <v-col cols="12">
+            <v-select
+              v-model="codeFormat"
+              label="Barcode Format"
+              :items="barcodeFormats"
+              variant="outlined"
+              density="compact"
+              hide-details
+              class="mb-2"
             />
           </v-col>
         </v-row>

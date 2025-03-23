@@ -1,6 +1,7 @@
 package de.lr.vouchermanager.api
 
 import de.lr.vouchermanager.api.model.VoucherResponse
+import de.lr.vouchermanager.data.CodeFormat
 import de.lr.vouchermanager.service.VoucherService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -14,6 +15,7 @@ import java.util.UUID
 data class CreateVoucherRequest(
     val shopId: UUID,
     val code: String,
+    val codeFormat: CodeFormat,
 )
 
 @RestController
@@ -39,7 +41,7 @@ class VouchersController(
     suspend fun createVoucher(
         @RequestBody request: CreateVoucherRequest,
     ): ResponseEntity<VoucherResponse> {
-        val voucher = voucherService.createVoucher(request.shopId, request.code)
+        val voucher = voucherService.createVoucher(request.shopId, request.code, request.codeFormat)
         return ResponseEntity.ok(voucher)
     }
 }

@@ -1,60 +1,73 @@
 databaseChangeLog:
-    -   changeSet:
-            id: 2025-03-15_15-00_init
-            author: LUCAS REINERS
-            changes:
-                -   createTable:
-                        tableName: shops
-                        columns:
-                            -   column:
-                                    name: id
-                                    type: UUID
-                                    constraints:
-                                        primaryKey: true
-                                        nullable: false
-                            -   column:
-                                    name: shop_name
-                                    type: VARCHAR(255)
-                                    constraints:
-                                        nullable: false
-                                        unique: true
-                            -   column:
-                                    name: background_color
-                                    type: VARCHAR(255)
-                                    constraints:
-                                        nullable: false
-                            -   column:
-                                    name: icon_url
-                                    type: VARCHAR(255)
-                                    constraints:
-                                        nullable: false
-                -   createTable:
-                        tableName: vouchers
-                        columns:
-                            -   column:
-                                    name: id
-                                    type: UUID
-                                    constraints:
-                                        primaryKey: true
-                                        nullable: false
-                            -   column:
-                                    name: code
-                                    type: VARCHAR(255)
-                                    constraints:
-                                        nullable: false
-                                        unique: true
-                            -   column:
-                                    name: created_at
-                                    type: TIMESTAMP
-                                    constraints:
-                                        nullable: false
-                            -   column:
-                                    name: redeemed_at
-                                    type: TIMESTAMP
-                                    constraints:
-                                        nullable: true
-                            -   column:
-                                    name: shop_id
-                                    type: UUID
-                                    constraints:
-                                        nullable: false
+    - changeSet:
+          id: 2025-03-15_15-00_init
+          author: LUCAS REINERS
+          changes:
+              - createTable:
+                    tableName: shops
+                    columns:
+                        - column:
+                              name: id
+                              type: UUID
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: shop_name
+                              type: VARCHAR(255)
+                              constraints:
+                                  nullable: false
+                                  unique: true
+                        - column:
+                              name: background_color
+                              type: VARCHAR(255)
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: icon_url
+                              type: VARCHAR(255)
+                              constraints:
+                                  nullable: false
+              - createTable:
+                    tableName: vouchers
+                    columns:
+                        - column:
+                              name: id
+                              type: UUID
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: code
+                              type: VARCHAR(255)
+                              constraints:
+                                  nullable: false
+                                  unique: true
+                        - column:
+                              name: created_at
+                              type: TIMESTAMP
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: redeemed_at
+                              type: TIMESTAMP
+                              constraints:
+                                  nullable: true
+                        - column:
+                              name: shop_id
+                              type: UUID
+                              constraints:
+                                  nullable: false
+    - changeSet:
+          id: 2025-03-23_10-00_add_code_format
+          author: LUCAS REINERS
+          changes:
+              - addColumn:
+                    tableName: vouchers
+                    columns:
+                        - column:
+                              name: code_format
+                              type: VARCHAR(10)
+                              defaultValue: "EAN13"
+                              constraints:
+                                  nullable: false

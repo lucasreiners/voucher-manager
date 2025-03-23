@@ -1,8 +1,9 @@
 package de.lr.vouchermanager.service
 
 import de.lr.vouchermanager.api.model.VoucherResponse
-import de.lr.vouchermanager.data.VoucherEntity
+import de.lr.vouchermanager.data.CodeFormat
 import de.lr.vouchermanager.data.ShopEntity
+import de.lr.vouchermanager.data.VoucherEntity
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -17,7 +18,7 @@ class VoucherService {
             addLogger(StdOutSqlLogger)
             VoucherEntity.all().sortedBy { it.createdAt }.map(VoucherEntity::toResponse)
         }
-        
+
     suspend fun redeemVoucher(id: UUID): VoucherResponse? =
         transaction {
             addLogger(StdOutSqlLogger)
@@ -30,15 +31,21 @@ class VoucherService {
             }
         }
 
-    suspend fun createVoucher(shopId: UUID, code: String): VoucherResponse =
+    suspend fun createVoucher(
+        shopId: UUID,
+        code: String,
+        codeFormat: CodeFormat = CodeFormat.EAN13,
+    ): VoucherResponse =
         transaction {
             addLogger(StdOutSqlLogger)
             val shop = ShopEntity.findById(shopId) ?: throw IllegalArgumentException("Shop not found")
-            VoucherEntity.new {
-                this.code = code
-                this.shop = shop
-                this.createdAt = Instant.now()
-            }.toResponse()
+            VoucherEntity
+                .new {
+                    this.code = code
+                    this.codeFormat = codeFormat
+                    this.shop = shop
+                    this.createdAt = Instant.now()
+                }.toResponse()
         }
 }
 
@@ -46,6 +53,7 @@ fun VoucherEntity.toResponse() =
     VoucherResponse(
         id = this.id.value,
         code = this.code,
+        codeFormat = this.codeFormat.name,
         createdAt = this.createdAt.toString(),
         redeemedAt = this.redeemedAt?.toString(),
         shopId = this.shop.id.value,

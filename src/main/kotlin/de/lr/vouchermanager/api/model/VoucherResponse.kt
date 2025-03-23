@@ -5,6 +5,7 @@ import java.util.UUID
 data class VoucherResponse(
     val id: UUID,
     val code: String,
+    val codeFormat: String,
     val createdAt: String,
     val redeemedAt: String?,
     val shopId: UUID,

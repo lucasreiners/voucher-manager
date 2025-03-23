@@ -26,11 +26,11 @@ const renderBarcode = () => {
 			}
 
 			JsBarcode(barcodeRef.value, props.voucher.code, {
-				format: "EAN",
+				format: props.voucher.codeFormat,
 				lineColor: "#000",
 				width: 2,
 				height: 80,
-				displayValue: false,
+				displayValue: true,
 				background: "#ffffff",
 			});
 		} catch (e) {
@@ -53,8 +53,6 @@ const handleRedeem = () => {
       <svg class="barcode" ref="barcodeRef"></svg>
     </div>
 
-    <span class="voucher-code">{{ voucher.code }}</span>
-    
     <button 
       v-if="!voucher.redeemedAt" 
       class="redeem-button" 

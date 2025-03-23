@@ -22,12 +22,14 @@ export async function fetchVouchers(): Promise<Voucher[]> {
 export async function createVoucher(
 	shopId: string,
 	code: string,
+	codeFormat = "EAN13",
 ): Promise<Voucher> {
 	// Ensure the shopId is a valid string that can be parsed as UUID
 	// Create a properly formatted JSON payload
 	const payload = {
 		shopId: shopId,
 		code: code,
+		codeFormat: codeFormat,
 	};
 
 	const response = await fetch(`${API_BASE_URL}/api/vouchers`, {
