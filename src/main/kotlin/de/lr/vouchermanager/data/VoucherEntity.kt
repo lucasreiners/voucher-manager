@@ -30,7 +30,7 @@ enum class CodeFormat {
 
 object VouchersTable : UUIDTable("vouchers") {
     val code = varchar("code", 255)
-    val codeFormat = enumerationByName("code_format", 10, 1de1rm1::class).default(CodeFormat.EAN13)
+    val codeFormat = enumerationByName("code_format", 10, CodeFormat::class).default(CodeFormat.EAN13)
     val createdAt = timestamp("created_at")
     val redeemedAt = timestamp("redeemed_at").nullable()
     val shopId = reference("shop_id", ShopsTable)

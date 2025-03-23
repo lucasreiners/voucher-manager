@@ -2,7 +2,7 @@
 import { ref, onUnmounted } from 'vue';
 import { createVoucher } from '../../services/apiService';
 import { useVoucherStore } from '../../state/voucherStore';
-import { Html5Qrcode } from 'html5-qrcode'; // You'll need to install this
+import { Html5Qrcode } from 'html5-qrcode';
 
 interface Props {
   shopId: string;
@@ -12,7 +12,7 @@ const props = defineProps<Props>();
 const voucherStore = useVoucherStore();
 
 const voucherCode = ref<string>('');
-const codeFormat = ref<string>('EAN13'); // Default to EAN format
+const codeFormat = ref<string>(''); // Removed default value
 const isSubmitting = ref<boolean>(false);
 const error = ref<string | null>(null);
 const showScanner = ref<boolean>(false);
@@ -20,6 +20,7 @@ const scannerRef = ref<HTMLDivElement | null>(null);
 const scannerInstance = ref<Html5Qrcode | null>(null);
 const snackbar = ref<boolean>(false);
 const snackbarMessage = ref<string>('');
+const snackbarColor = ref<string>(''); // Added snackbar color
 
 // Barcode format options
 const barcodeFormats = [
@@ -60,6 +61,7 @@ const handleSubmit = async (e: Event): Promise<void> => {
     // Show success message
     snackbarMessage.value = 'Voucher was successfully added!';
     snackbar.value = true;
+    snackbarColor.value = 'success'; // Set success color for the snackbar
     
     // Clear the input field
     voucherCode.value = '';
@@ -79,8 +81,32 @@ const startScanner = async () => {
     const html5QrCode = new Html5Qrcode("qr-reader");
     scannerInstance.value = html5QrCode;
     
-    const qrCodeSuccessCallback = (decodedText: string) => {
-      voucherCode.value = decodedText;
+    // Use a more specific type instead of any
+    interface DecodedResult {
+      result: {
+        format?: {
+          formatName: string;
+        };
+      };
+    }
+    
+    const qrCodeSuccessCallback = (decodedText: string, decodedResult: DecodedResult) => {
+      // Use optional chaining
+      if (decodedResult?.result?.format?.formatName) {
+        // Map the format from the decoder to our supported formats
+        try {
+          const detectedFormat = mapDecoderFormatToSupportedFormat(decodedResult.result.format.formatName);
+          // Only set the code value and format if the format is supported
+          voucherCode.value = decodedText;
+          codeFormat.value = detectedFormat;
+        } catch (err) {
+          // Display error toast for unsupported format
+          snackbarMessage.value = `${err}`;
+          snackbar.value = true;
+          snackbarColor.value = 'error'; // Set error color for the snackbar
+        }
+      }
+      
       stopScanner();
     };
     
@@ -102,9 +128,33 @@ const startScanner = async () => {
   }
 };
 
+// Map the decoder format names to our supported formats
+const mapDecoderFormatToSupportedFormat = (decoderFormat: string): string => {
+  // The library might return formats in different naming convention
+  const formatMap: Record<string, string> = {
+    'EAN_13': 'EAN13',
+    'EAN_8': 'EAN8',
+    'EAN_5': 'EAN5',
+    'EAN_2': 'EAN2',
+    'UPC_A': 'UPCA',
+    'UPC_E': 'UPCE',
+    'CODE_128': 'CODE128',
+    'CODE_93': 'CODE93',
+    'CODE_39': 'CODE39', 
+    'ITF': 'ITF'
+  };
+  
+  const upperDecoderFormat = decoderFormat.toUpperCase();
+  if (formatMap[upperDecoderFormat]) {
+    return formatMap[upperDecoderFormat];
+  }
+  
+  throw new Error(`Barcode format "${decoderFormat}" is not supported`);
+};
+
 const stopScanner = () => {
   if (scannerInstance.value) {
-    scannerInstance.value.stop().catch(error => {
+    scannerInstance.value.stop().catch((error: Error) => {
       console.error("Error stopping scanner:", error);
     });
     scannerInstance.value = null;
@@ -182,7 +232,7 @@ onUnmounted(() => {
     <v-snackbar
       v-model="snackbar"
       :timeout="3000"
-      color="success"
+      :color="snackbarColor"
       location="top"
     >
       {{ snackbarMessage }}
