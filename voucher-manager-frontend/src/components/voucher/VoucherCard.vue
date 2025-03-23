@@ -26,7 +26,7 @@ const renderBarcode = () => {
 			}
 
 			JsBarcode(barcodeRef.value, props.voucher.code, {
-				format: "CODE128",
+				format: "EAN",
 				lineColor: "#000",
 				width: 2,
 				height: 80,
