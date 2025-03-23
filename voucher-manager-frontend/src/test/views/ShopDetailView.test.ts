@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { mount } from "@vue/test-utils";
-import { createRouter, createMemoryHistory } from "vue-router";
 import { createTestingPinia } from "@pinia/testing";
-import ShopDetailView from "../../views/ShopDetailView.vue";
+import { mount } from "@vue/test-utils";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createMemoryHistory, createRouter } from "vue-router";
 import { useVoucherStore } from "../../state/voucherStore";
+import ShopDetailView from "../../views/ShopDetailView.vue";
 
 // Mock the composable
 vi.mock("../../composables/useScreenBrightness", () => ({

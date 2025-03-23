@@ -1,55 +1,59 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
-import JsBarcode from "jsbarcode";
+import JsBarcode from 'jsbarcode';
+import { onMounted, ref, watch } from 'vue';
 import type { Voucher } from '../../types';
 
 interface Props {
-  voucher: Voucher;
+    voucher: Voucher;
 }
 
 const props = defineProps<Props>();
-const emit = defineEmits(["redeem"]);
+const emit = defineEmits(['redeem']);
 const barcodeRef = ref<SVGSVGElement | null>(null);
 
 onMounted(() => {
-  if (barcodeRef.value) {
-    renderBarcode();
-  }
+    if (barcodeRef.value) {
+        renderBarcode();
+    }
 });
 
 // Watch for voucher changes and re-render barcode
-watch(() => props.voucher, () => {
-  if (barcodeRef.value) {
-    renderBarcode();
-  }
-}, { deep: true });
+watch(
+    () => props.voucher,
+    () => {
+        if (barcodeRef.value) {
+            renderBarcode();
+        }
+    },
+    { deep: true },
+);
 
 const renderBarcode = (): void => {
-  if (!barcodeRef.value || !props.voucher) {
-    return;
-  }
-
-  try {
-    // Clear previous content
-    while (barcodeRef.value.firstChild) {
-      barcodeRef.value.removeChild(barcodeRef.value.firstChild);
+    if (!barcodeRef.value || !props.voucher) {
+        return;
     }
 
-    JsBarcode(barcodeRef.value, props.voucher.code, {
-      format: props.voucher.codeFormat,
-      lineColor: "#000",
-      width: 2,
-      height: 80,
-      displayValue: true,
-      background: "#ffffff"
-    });
-  } catch (e) {
-    console.error("Error generating barcode:", e);
-  }
+    try {
+        // Clear previous content
+        while (barcodeRef.value.firstChild) {
+            barcodeRef.value.removeChild(barcodeRef.value.firstChild);
+        }
+
+        JsBarcode(barcodeRef.value, props.voucher.code, {
+            format: props.voucher.codeFormat,
+            lineColor: '#000',
+            width: 2,
+            height: 80,
+            displayValue: true,
+            background: '#ffffff',
+        });
+    } catch (e) {
+        console.error('Error generating barcode:', e);
+    }
 };
 
 const handleRedeem = (): void => {
-  emit("redeem", props.voucher.id);
+    emit('redeem', props.voucher.id);
 };
 </script>
 

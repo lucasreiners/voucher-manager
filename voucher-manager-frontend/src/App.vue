@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { onMounted } from 'vue';
-import { useVoucherStore } from './state/voucherStore';
-import { useShopStore } from './state/shopStore';
+import { useRoute, useRouter } from 'vue-router';
 import { fetchShops, fetchVouchers } from './services/apiService';
-import { useRouter, useRoute } from 'vue-router';
+import { useShopStore } from './state/shopStore';
+import { useVoucherStore } from './state/voucherStore';
 
 const router = useRouter();
 const route = useRoute();
@@ -12,25 +12,25 @@ const voucherStore = useVoucherStore();
 const shopStore = useShopStore();
 
 const isShopDetail = computed((): boolean => {
-  return route.name === 'shop-detail';
+    return route.name === 'shop-detail';
 });
 
 const goToAddVoucher = (): void => {
-  if (isShopDetail.value) {
-    router.push(`/shops/${route.params.id}/add-voucher`);
-  }
+    if (isShopDetail.value) {
+        router.push(`/shops/${route.params.id}/add-voucher`);
+    }
 };
 
 onMounted(async (): Promise<void> => {
-  try {
-    const vouchersData = await fetchVouchers();
-    voucherStore.setVouchers(vouchersData);
-    
-    const shopsData = await fetchShops();
-    shopStore.setShops(shopsData);
-  } catch (error) {
-    console.error('Error loading application data:', error);
-  }
+    try {
+        const vouchersData = await fetchVouchers();
+        voucherStore.setVouchers(vouchersData);
+
+        const shopsData = await fetchShops();
+        shopStore.setShops(shopsData);
+    } catch (error) {
+        console.error('Error loading application data:', error);
+    }
 });
 </script>
 

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { useShopStore } from '../state/shopStore';
-import { useVoucherStore } from '../state/voucherStore';
-import { useScreenBrightness } from '../composables/useScreenBrightness';
-import type { Shop, Voucher } from '../types';
 import ConfirmDialog from '../components/layout/ConfirmDialog.vue';
 import VoucherCard from '../components/voucher/VoucherCard.vue';
+import { useScreenBrightness } from '../composables/useScreenBrightness';
+import { useShopStore } from '../state/shopStore';
+import { useVoucherStore } from '../state/voucherStore';
+import type { Shop, Voucher } from '../types';
 
 const route = useRoute();
 const shopStore = useShopStore();
@@ -15,42 +15,45 @@ const { setMaxBrightness, resetBrightness } = useScreenBrightness();
 const showRedeemedVouchers = ref(false);
 
 const shop = computed((): Shop | undefined => {
-  return shopStore.shops.find((s) => s.id === route.params.id);
+    return shopStore.shops.find((s) => s.id === route.params.id);
 });
 
 // For unredeemed vouchers (active)
 const firstUnredeemedVoucher = computed((): Voucher | undefined => {
-  return voucherStore.vouchers
-    .filter((v) => v.shopId === shop.value?.id && !v.redeemedAt)
-    .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt))[0];
+    return voucherStore.vouchers
+        .filter((v) => v.shopId === shop.value?.id && !v.redeemedAt)
+        .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt))[0];
 });
 
 // For redeemed vouchers
 const redeemedVouchers = computed((): Voucher[] => {
-  return voucherStore.vouchers
-    .filter((v) => v.shopId === shop.value?.id && v.redeemedAt)
-    .sort((a, b) => Date.parse(b.redeemedAt || '') - Date.parse(a.redeemedAt || ''));
+    return voucherStore.vouchers
+        .filter((v) => v.shopId === shop.value?.id && v.redeemedAt)
+        .sort(
+            (a, b) =>
+                Date.parse(b.redeemedAt || '') - Date.parse(a.redeemedAt || ''),
+        );
 });
 
 // Watch for changes in unredeemed vouchers to manage brightness
 watch(firstUnredeemedVoucher, (newVal) => {
-  if (newVal) {
-    setMaxBrightness();
-  } else {
-    resetBrightness();
-  }
+    if (newVal) {
+        setMaxBrightness();
+    } else {
+        resetBrightness();
+    }
 });
 
 // Set initial brightness
 onMounted(() => {
-  if (firstUnredeemedVoucher.value) {
-    setMaxBrightness();
-  }
+    if (firstUnredeemedVoucher.value) {
+        setMaxBrightness();
+    }
 });
 
 // Reset brightness when leaving the view
 onBeforeUnmount(() => {
-  resetBrightness();
+    resetBrightness();
 });
 
 const isRedeeming = ref(false);
@@ -58,29 +61,33 @@ const redeemError = ref<string | null>(null);
 const showConfirmDialog = ref(false);
 
 const handleConfirm = async (): Promise<void> => {
-  if (!firstUnredeemedVoucher.value || firstUnredeemedVoucher.value.redeemedAt) {
-    return;
-  }
+    if (
+        !firstUnredeemedVoucher.value ||
+        firstUnredeemedVoucher.value.redeemedAt
+    ) {
+        return;
+    }
 
-  try {
-    isRedeeming.value = true;
-    redeemError.value = null;
-    await voucherStore.redeemVoucher(firstUnredeemedVoucher.value.id);
-    showConfirmDialog.value = false;
-  } catch (error) {
-    redeemError.value = "Gutschein konnte nicht als verbraucht markiert werden. Bitte versuchen Sie es erneut.";
-    console.error('Error redeeming voucher:', error);
-  } finally {
-    isRedeeming.value = false;
-  }
+    try {
+        isRedeeming.value = true;
+        redeemError.value = null;
+        await voucherStore.redeemVoucher(firstUnredeemedVoucher.value.id);
+        showConfirmDialog.value = false;
+    } catch (error) {
+        redeemError.value =
+            'Gutschein konnte nicht als verbraucht markiert werden. Bitte versuchen Sie es erneut.';
+        console.error('Error redeeming voucher:', error);
+    } finally {
+        isRedeeming.value = false;
+    }
 };
 
 const handleCancel = (): void => {
-  showConfirmDialog.value = false;
+    showConfirmDialog.value = false;
 };
 
 const toggleRedeemedVouchers = (): void => {
-  showRedeemedVouchers.value = !showRedeemedVouchers.value;
+    showRedeemedVouchers.value = !showRedeemedVouchers.value;
 };
 </script>
 

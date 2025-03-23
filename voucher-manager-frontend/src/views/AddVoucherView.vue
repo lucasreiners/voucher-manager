@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from "vue-router";
-import VoucherForm from "../components/voucher/VoucherForm.vue";
+import { useRoute, useRouter } from 'vue-router';
+import VoucherForm from '../components/voucher/VoucherForm.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -8,8 +8,8 @@ const router = useRouter();
 const shopId = route.params.id as string;
 
 const handleVoucherAdded = () => {
-	// Also use id here for consistency
-	router.push(`/shops/${route.params.id}`);
+    // Also use id here for consistency
+    router.push(`/shops/${route.params.id}`);
 };
 </script>
 

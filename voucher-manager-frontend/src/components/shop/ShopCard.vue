@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { Shop } from "../../types";
+import type { Shop } from '../../types';
 
 interface Props {
-	shop: Shop;
+    shop: Shop;
 }
 
 defineProps<Props>();
