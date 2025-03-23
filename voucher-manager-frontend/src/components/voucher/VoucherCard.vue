@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import JsBarcode from "jsbarcode";
 import type { Voucher } from '../../types';
 
@@ -17,36 +17,44 @@ onMounted(() => {
   }
 });
 
-const renderBarcode = () => {
-	if (barcodeRef.value && props.voucher) {
-		try {
-			// Clear previous content
-			while (barcodeRef.value.firstChild) {
-				barcodeRef.value.removeChild(barcodeRef.value.firstChild);
-			}
+// Watch for voucher changes and re-render barcode
+watch(() => props.voucher, () => {
+  if (barcodeRef.value) {
+    renderBarcode();
+  }
+}, { deep: true });
 
-			JsBarcode(barcodeRef.value, props.voucher.code, {
-				format: props.voucher.codeFormat,
-				lineColor: "#000",
-				width: 2,
-				height: 80,
-				displayValue: true,
-				background: "#ffffff",
-			});
-		} catch (e) {
-			console.error("Error generating barcode:", e);
-		}
-	}
+const renderBarcode = (): void => {
+  if (!barcodeRef.value || !props.voucher) {
+    return;
+  }
+
+  try {
+    // Clear previous content
+    while (barcodeRef.value.firstChild) {
+      barcodeRef.value.removeChild(barcodeRef.value.firstChild);
+    }
+
+    JsBarcode(barcodeRef.value, props.voucher.code, {
+      format: props.voucher.codeFormat,
+      lineColor: "#000",
+      width: 2,
+      height: 80,
+      displayValue: true,
+      background: "#ffffff"
+    });
+  } catch (e) {
+    console.error("Error generating barcode:", e);
+  }
 };
 
-const handleRedeem = () => {
-	emit("redeem", props.voucher.id);
+const handleRedeem = (): void => {
+  emit("redeem", props.voucher.id);
 };
 </script>
 
 <template>
   <div class="voucher-card">
-    
     <h3>Guthabenkarte</h3>
     
     <div class="barcode-wrapper">
