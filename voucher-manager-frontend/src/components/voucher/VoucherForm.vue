@@ -45,7 +45,9 @@ const barcodeFormats = [
 
 const handleSubmit = async (e: Event): Promise<void> => {
 	e.preventDefault();
-	if (!voucherCode.value.trim()) return;
+	if (!voucherCode.value.trim()) {
+		return;
+	}
 
 	isSubmitting.value = true;
 	error.value = null;
@@ -73,7 +75,9 @@ const handleSubmit = async (e: Event): Promise<void> => {
 };
 
 const startScanner = async () => {
-	if (!scannerRef.value) return;
+	if (!scannerRef.value) {
+		return;
+	}
 
 	showScanner.value = true;
 

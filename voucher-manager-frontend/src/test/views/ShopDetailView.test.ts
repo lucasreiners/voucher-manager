@@ -48,6 +48,7 @@ describe("ShopDetailView", () => {
 		},
 	];
 
+	// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
 	let router;
 
 	beforeEach(() => {
