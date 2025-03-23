@@ -9,11 +9,11 @@ const router = useRouter();
 const shopStore = useShopStore();
 
 onMounted(async (): Promise<void> => {
-  await shopStore.loadShops();
+    await shopStore.loadShops();
 });
 
 const handleShopClick = (shop: Shop): void => {
-  router.push(`/shops/${shop.id}`);
+    router.push(`/shops/${shop.id}`);
 };
 </script>
 

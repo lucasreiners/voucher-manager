@@ -1,0 +1,19 @@
+name: PR Checks
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  lint:
+    name: Lint Code
+    uses: ./.github/workflows/lint.yml
+    
+  backend-tests:
+    name: Backend Tests
+    uses: ./.github/workflows/backend-test.yml
+    needs: lint
+    
+  frontend-tests:
+    name: Frontend Tests
+    uses: ./.github/workflows/frontend-test.yml
+    needs: lint

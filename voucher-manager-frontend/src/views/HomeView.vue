@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { useShopStore } from '../state/shopStore';
 import ShopList from '../components/shop/ShopList.vue';
+import { useShopStore } from '../state/shopStore';
 
 const router = useRouter();
 const shopStore = useShopStore();
 
 const showShopDetails = (shop: { id: string }) => {
-  router.push(`/shops/${shop.id}`);
+    router.push(`/shops/${shop.id}`);
 };
 </script>
 

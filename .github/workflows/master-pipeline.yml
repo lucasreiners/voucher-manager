@@ -1,0 +1,55 @@
+name: Test, Build and Deploy
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  lint:
+    name: Lint
+    uses: ./.github/workflows/lint.yml
+    
+  backend-tests:
+    name: Backend Tests
+    needs: [lint]
+    uses: ./.github/workflows/backend-test.yml
+    
+  frontend-tests:
+    name: Frontend Tests
+    needs: [lint]
+    uses: ./.github/workflows/frontend-test.yml
+    
+  build-and-push:
+    name: Build and Push Docker Images
+    needs: [backend-tests, frontend-tests]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Build and push backend Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/lucasreiners/voucher-manager/backend:latest
+          
+      - name: Build and push frontend Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./voucher-manager-frontend
+          push: true
+          tags: ghcr.io/lucasreiners/voucher-manager/frontend:latest

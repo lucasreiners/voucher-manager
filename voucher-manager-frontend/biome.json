@@ -31,7 +31,23 @@
         }
     },
     "files": {
-        "include": ["src/**/*.{ts,tsx,js,jsx,vue}"],
-        "ignore": ["node_modules", "dist"]
+        "include": [
+            "src/**/*.ts",
+            "src/**/*.js",
+            "src/**/*.vue",
+            "src/**/*.tsx",
+            "src/**/*.jsx"
+        ],
+        "ignore": [
+            "node_modules/**",
+            "dist/**",
+            "**/*.config.{js,ts}",
+            "coverage/**"
+        ]
+    },
+    "vcs": {
+        "enabled": true,
+        "clientKind": "git",
+        "useIgnoreFile": true
     }
 }

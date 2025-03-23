@@ -1,31 +1,31 @@
 <script setup lang="ts">
 interface Props {
-  show: boolean;
-  title: string;
-  message: string;
-  confirmText?: string;
-  cancelText?: string;
+    show: boolean;
+    title: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  confirmText: 'Confirm',
-  cancelText: 'Cancel'
+    confirmText: 'Confirm',
+    cancelText: 'Cancel',
 });
 
 const emit = defineEmits<{
-  (e: 'confirm'): void;
-  (e: 'cancel'): void;
-  (e: 'update:show', value: boolean): void;
+    (e: 'confirm'): void;
+    (e: 'cancel'): void;
+    (e: 'update:show', value: boolean): void;
 }>();
 
 const handleConfirm = (): void => {
-  emit('confirm');
-  emit('update:show', false);
+    emit('confirm');
+    emit('update:show', false);
 };
 
 const handleCancel = (): void => {
-  emit('cancel');
-  emit('update:show', false);
+    emit('cancel');
+    emit('update:show', false);
 };
 </script>
 

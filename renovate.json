@@ -1,6 +1,25 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ]
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": ["config:recommended"],
+	"packageRules": [
+		{
+			"matchUpdateTypes": ["minor", "patch"],
+			"matchCurrentVersion": "!/^0/",
+			"automerge": true
+		},
+		{
+			"matchPackagePatterns": ["^@vue", "^vue"],
+			"groupName": "vue packages"
+		},
+		{
+			"matchPackagePatterns": ["^@spring", "spring-"],
+			"groupName": "spring packages"
+		}
+	],
+	"rangeStrategy": "pin",
+	"separateMajorMinor": true,
+	"ignorePaths": ["**/build/**"],
+	"gradle": {
+		"fileMatch": ["(^|/)build\\.gradle\\.kts$"]
+	}
 }
