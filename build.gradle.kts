@@ -26,7 +26,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
     implementation("org.liquibase:liquibase-core")
     implementation("org.jetbrains.exposed:exposed-spring-boot-starter:0.60.0")
-    implementation("com.h2database:h2:2.2.224")
+    implementation("com.h2database:h2:2.3.232")
     implementation("org.jetbrains.exposed:exposed-java-time:0.60.0")
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
