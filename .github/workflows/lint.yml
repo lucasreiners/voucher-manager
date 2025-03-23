@@ -31,7 +31,7 @@ jobs:
         run: chmod +x ./gradlew
         
       - name: Run Kotlin linter
-        run: ./gradlew ktlintCheck
+        run: ./gradlew lintKotlin
 
   lint-frontend:
     name: Lint Frontend Code
